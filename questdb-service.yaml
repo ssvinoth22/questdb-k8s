@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: questdb
+  labels:
+    app: questdb
+spec:
+  ports:
+  - port: 8812
+    name: questdb
+    targetPort: 8812
+  - port: 9000
+    name: questdb-ui
+    targetPort: 9000
+  type: ClusterIP
+  selector:
+    app: questdb

@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: questdb
+spec:
+  serviceName: "questdb"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: questdb
+  template:
+    metadata:
+      labels:
+        app: questdb
+    spec:
+      containers:
+      - name: questdb
+        image: questdb/questdb:latest
+        envFrom:
+          - configMapRef:
+              name: questdb-config
+        ports:
+        - containerPort: 9000
+          name: questdb-ui
+        - containerPort: 8812
+          name: questdb
+        volumeMounts:
+        - name: config
+          mountPath: /root/.questdb/conf/server.conf
+          subPath: server.conf
+      volumes:
+      # You set volumes at the Pod level, then mount them into containers inside that Pod
+      - name: config
+        configMap:
+          # Provide the name of the ConfigMap you want to mount.
+          name: questdb-config
+          # An array of keys from the ConfigMap to create as files
+          items:
+          - key: "server.conf"
+            path: "server.conf"
+  volumeClaimTemplates:
+  - metadata:
+      name: questdb
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: gp2
+      resources:
+        requests:
+          storage: 10Gi
